@@ -24,13 +24,36 @@ The config/xbeeconfig.rb was removed by Mike Ashmore and for good reason. The co
 \smalltodo[noline]{Implement critical exception handling for proper functioning}
 Currently ruby-xbee is very easily choked. Needs to be fixed.
 
+%%
+% About the Synchronous/Asynchronous stuff
+%
+\subsection{Decoupling sending and receiving if needed}
+\smalltodo[noline]{Make it possible to call functions so that no reply is expected (API mode)}
+The current problem of Ruby::XBee implementation is that it assumes synchronous information flow... Meaning that if we send out a command then based on the type of command a response or set of them are expected. Especially in API mode this becomes apparent where the reply is evaluated based on the type of frame and the frame ID. Synchronous mode can work when playing with one end device, but the method of communication is not scalable.
+
+\noindent A wireless sensor network can operate in asynchronous fashion or in hybrid. Thus in scope of creating xHAC (which is totally outside the scope of Ruby::XBee) a challenge is presented how the coordinator should be controlled. Basically a design is required which would be able to process any type of frame but also be able to send out commands and process the command replies in an orderly fashion.
+
+\noindent Basically, what we need is a command/reply/message queue processings which would not be IO blocking. Or we need to separate io communication from the rest of the flow logic.
+
+\noindent The only other way would be to design the whole network to be synchronous, but that would break if we have sleeping end devices in our network (the reply to command can take considerable amount of time before the device wakes up and is able to send a reply)
+
+\noindent It very much seems like the way forward is to use a message queuing and a broker. A broker for commands and just make Ruby::XBee wait for frames or send for frames (without waiting for reply). With the current Ruby::XBee implementation a too low level calls must be made, so instead the functions like set/get_param or _remote_param should have the option that it will not wait for a reply. Sometimes you don't even want a reply (frame_id=0) or if you expect a reply you would like to handle it outside the scope of Ruby::XBee.
+
+\noindent To rant further, AMQP seems like the way to go. XBee wireless sensor network will most probably utilize a hybrid messaging patterns. There's the usual Request/Reply, where we send out a command and expect a reply or set of replies. But there are also frames that can be sent regularly based on the interval, resembling more Publish/Subscribe model. AMQP would be able to accomodate such different patterns and would able me to easily offload that tedious task. Further more, AMQP is extendable with a wide range of fancyness:
+\begin{itemize}
+\item Per message queue TTL (Time-to-Live) - TTL would help in scenarios where we send out a command to a specific XBee sensor but will never get a reply. the TTL would make sure that the broker discards such packets
+\item Last Will and Testament (LWT) - This is implemented in MQTT protocol but establishes a message that is sent when a remote device unexpectedly "disconnects". For XBees this could mean that the LWT is published when a device has been silent for cetain amount of time or doesn't answer to commands. Thus triggering LWT message to xHAC
+\end{itemize}
+
+\noindent So, before an actual asynchronous application can be built upon Ruby::XBee framework some accomodation is needed.
+
 \section{Testing}
 \subsection{Wha..?}
 Ruby in general is quite famous for it's Test::Unit but also for Rspec and Cucumber - in short, it's a thing to do when developing Ruby/Rails app and organizing an orchestra of good tests can keep headache away later on.
 
 \section{What I'm in the progress of doing}
 \begin{itemize}
-\item Fixing for Bundle and Rake, integration with Travis and Awesome testing!
+\item Study of API mode 1 vs 2 - http://www.digi.com/support/kbase/kbaseresultdetl?id=2199
 \end{itemize}
 
 \section{Memorable quotes picked up along the Journey}
