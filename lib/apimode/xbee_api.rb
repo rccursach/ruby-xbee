@@ -7,10 +7,10 @@ module XBee
   
     VERSION = "1.1.0" # Version of this class
   
-    def initialize(xbee_usbdev_str, uart_config = XBeeUARTConfig.new, operation_mode = "AT")
-      super(xbee_usbdev_str, uart_config, operation_mode)
+    def initialize(xbee_usbdev_str, uart_config = XBeeUARTConfig.new, operation_mode = :AT, transmission_mode = :SYNC)
+      super(xbee_usbdev_str, uart_config, operation_mode, transmission_mode)
       @frame_id = 1
-      if self.operation_mode == "AT"
+      if self.operation_mode == :AT
         start_apimode_communication
       end
     end
@@ -37,21 +37,23 @@ module XBee
       at_command_frame = XBee::Frame::ATCommand.new(at_param_name,frame_id,nil,at_param_unpack_string)
       puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]"
       self.xbee_serialport.write(at_command_frame._dump)
-      r = XBee::Frame.new(self.xbee_serialport)
-      if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
-        if block_given?
-          yield r
-        else
-          #### DEBUG ####
-          if $DEBUG then
-            print "At parameter unpack string to be used: #{at_param_unpack_string} | "
-            puts "Debug Return value for value: #{r.retrieved_value.unpack(at_param_unpack_string)}"
+      if self.transmission_mode == :SYNC
+        r = XBee::Frame.new(self.xbee_serialport)
+        if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
+          if block_given?
+            yield r
+          else
+            #### DEBUG ####
+            if $DEBUG then
+              print "At parameter unpack string to be used: #{at_param_unpack_string} | "
+              puts "Debug Return value for value: #{r.retrieved_value.unpack(at_param_unpack_string)}"
+            end
+            #### DEBUG ####
+            at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
           end
-          #### DEBUG ####
-          at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+        else
+          raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
         end
-      else
-        raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
       end
     end
 
@@ -60,15 +62,17 @@ module XBee
       at_command_frame = XBee::Frame::ATCommand.new(at_param_name,frame_id,param_value,at_param_unpack_string)
       # puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]"
       self.xbee_serialport.write(at_command_frame._dump)
+      if self.transmission_mode == :SYNC
       r = XBee::Frame.new(self.xbee_serialport)
-      if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
-        if block_given?
-          yield r
+        if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
+          if block_given?
+            yield r
+          else
+            at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+          end
         else
-          at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+          raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
         end
-      else
-        raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
       end
     end
 
@@ -77,15 +81,17 @@ module XBee
       at_command_frame = XBee::Frame::RemoteCommandRequest.new(at_param_name, remote_address, remote_network_address, frame_id, nil, at_param_unpack_string)
       puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]" 
       self.xbee_serialport.write(at_command_frame._dump)
-      r = XBee::Frame.new(self.xbee_serialport)
-      if r.kind_of?(XBee::Frame::RemoteCommandResponse) && r.status == :OK && r.frame_id == frame_id
-        if block_given?
-          yield r
+      if self.transmission_mode == :SYNC
+        r = XBee::Frame.new(self.xbee_serialport)
+        if r.kind_of?(XBee::Frame::RemoteCommandResponse) && r.status == :OK && r.frame_id == frame_id
+          if block_given?
+            yield r
+          else
+            at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+          end
         else
-          at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+          raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
         end
-      else
-        raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
       end
     end
 
@@ -94,15 +100,17 @@ module XBee
       at_command_frame = XBee::Frame::RemoteCommandRequest.new(at_param_name, remote_address, remote_network_address, frame_id, param_value, at_param_unpack_string)
       puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]"
       self.xbee_serialport.write(at_command_frame._dump)
-      r = XBee::Frame.new(self.xbee_serialport)
-      if r.kind_of?(XBee::Frame::RemoteCommandResponse) && r.status == :OK && r.frame_id == frame_id
-        if block_given?
-          yield r
+      if self.transmission_mode == :SYNC
+        r = XBee::Frame.new(self.xbee_serialport)
+        if r.kind_of?(XBee::Frame::RemoteCommandResponse) && r.status == :OK && r.frame_id == frame_id
+          if block_given?
+            yield r
+          else
+            at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+          end
         else
-          at_param_unpack_string.nil? ? r.retrieved_value : r.retrieved_value.unpack(at_param_unpack_string).first
+          raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
         end
-      else
-        raise "Response did not indicate successful retrieval of that parameter: #{r.inspect}"
       end
     end
 
@@ -170,9 +178,7 @@ module XBee
       rescue Exception => e
         puts "Okay, must have finally timed out on the serial read: #{e}."
       end
-      #end
       @xbee_serialport.read_timeout = tmp
-      #read_thread.join
       responses.map do |r|
         unpacked_fields = r.retrieved_value.unpack("nNNZxnCCnn")
         return_fields = [:SH, :SL, :NI, :PARENT_NETWORK_ADDRESS, :DEVICE_TYPE, :STATUS, :PROFILE_ID, :MANUFACTURER_ID]
@@ -195,7 +201,7 @@ module XBee
     # Parameter range: 0 - 0xFFFFFFFF
     def destination_low!(low_addr)
       @xbee_serialport.write("ATDL#{low_addr}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -209,7 +215,7 @@ module XBee
     # Parameter range: 0 - 0xFFFFFFFF
     def destination_high!(high_addr)
       self.xbee_serialport.write("ATDH#{high_addr}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -238,9 +244,11 @@ module XBee
       tmp = @xbee_serialport.read_timeout
       @xbee_serialport.read_timeout = read_timeout(:long)
       @xbee_serialport.write("ATCH\r")
-      response = getresponse
-      @xbee_serialport.read_timeout = tmp
-      response.strip.chomp
+      if self.tranmission_mode == :SYNC
+        response = getresponse
+        @xbee_serialport.read_timeout = tmp
+        response.strip.chomp
+      end
     end
 
     ##
@@ -250,9 +258,11 @@ module XBee
       tmp = @xbee_serialport.read_timeout
       @xbee_serialport.read_timeout = read_timeout(:long)
       @xbee_serialport.write("ATCH#{new_channel}\r")
-      response = getresponse
-      @xbee_serialport.read_timeout = tmp
-      response.strip.chomp
+      if self.transmission_mode == :SYNC
+        response = getresponse
+        @xbee_serialport.read_timeout = tmp
+        response.strip.chomp
+      end
     end
 
     ##
@@ -260,16 +270,6 @@ module XBee
     # to give to the XBee device, much like a hostname.
     def node_id
       @node_id ||= get_param("NI")
-      #tmp = @xbee_serialport.read_timeout
-      #@xbee_serialport.read_timeout = read_timeout(:long)
-      #@xbee_serialport.write("ATNI\r")
-      #response = getresponse
-      #@xbee_serialport.read_timeout = tmp
-      #if ( response.nil? )
-      #  return ""
-      #else
-      #  response.strip.chomp
-      #end
     end
 
     ##
@@ -280,12 +280,14 @@ module XBee
       tmp = @xbee_serialport.read_timeout
       @xbee_serialport.read_timeout = read_timeout(:long)
       @xbee_serialport.write("ATNI#{new_id}\r")
-      response = getresponse
-      @xbee_serialport.read_timeout = tmp
-      if ( response.nil? )
-        return ""
-      else
-        response.strip.chomp
+      if self.transmission_mode == :SYNC
+        response = getresponse
+        @xbee_serialport.read_timeout = tmp
+        if ( response.nil? )
+          return ""
+        else
+          response.strip.chomp
+        end
       end
     end
 
@@ -305,7 +307,7 @@ module XBee
     # is set to 0x3332.
     def pan_id!(new_id)
       @xbee_serialport.write("ATID#{new_id}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -333,7 +335,7 @@ module XBee
     # acceptable baud rates are: 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200
     def baud!( baud_rate )
       @xbee_serialport.write("ATBD#{@baudcodes[baud_rate]}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -344,9 +346,11 @@ module XBee
     # :Mark - for 8-bit mark
     # :Space - for 8-bit space
     def parity
-       @xbee_serialport.write("ATNB\r")
-       response = getresponse().strip.chomp
-       @paritycodes.index( response.to_i )
+      @xbee_serialport.write("ATNB\r")
+      if self.transmission_mode == :SYNC
+        response = getresponse().strip.chomp
+        @paritycodes.index( response.to_i )
+      end
     end
 
     ##
@@ -362,7 +366,7 @@ module XBee
         return false
       end
       @xbee_serialport.write("ATNB#{@paritycodes[parity_type]}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -387,21 +391,22 @@ module XBee
     def dio( port )
       at = "AT#{port.to_s}\r"
       @xbee_serialport.write( at )
-      response = getresponse.to_i
+      if self.transmission_mode == :SYNC
+        response = getresponse.to_i
 
-      if response == 1  # the value of 1 is overloaded based on port number
-        case port
-        when :D5
-          return :Associated_Indicator
-        when :D6
-          return :RTS
-        when :D7
-          return :CTS
+        if response == 1  # the value of 1 is overloaded based on port number
+          case port
+          when :D5
+            return :Associated_Indicator
+          when :D6
+            return :RTS
+          when :D7
+            return :CTS
+          end
+        else
+          @iotypes.index(response)
         end
-      else
-        @iotypes.index(response)
       end
-
     end
 
     ##
@@ -430,7 +435,7 @@ module XBee
     def dio!( port, iotype )
       at = "AT#{port.to_s}#{@iotypes[iotype]}\r"
       @xbee_serialport.write( at )
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -438,7 +443,7 @@ module XBee
     # which DIO lines, 0-7 are enabled or disabled for change detect monitoring
     def dio_change_detect
       @xbee_serialport.write("ATIC\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -446,7 +451,7 @@ module XBee
     # which enables or disables the change detect monitoring for any of the DIO ports 0-7
     def dio_change_detect!( hexbitmap )
       @xbee_serialport.write("ATIC#{hexbitmask}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -455,7 +460,7 @@ module XBee
     # XBee.
     def io_output!( hexbitmap )
       @xbee_serialport.write("ATIO#{hexbitmap}\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -471,38 +476,40 @@ module XBee
       @xbee_serialport.read_timeout = read_timeout(:long)
 
       @xbee_serialport.write("ATIS\r")
-      response = getresponse
-      linenum = 1
-      adc_sample = 1
-      samples = Hash.new
+      if self.transmission_mode == :SYNC
+        response = getresponse
+        linenum = 1
+        adc_sample = 1
+        samples = Hash.new
 
-      if response.match("ERROR")
-        samples[:ERROR] = "ERROR"
-        return samples
-      end
-
-      # otherwise parse input data
-      response.each_line do | line |
-        case linenum
-        when 1
-          samples[:NUM] = line.to_i
-        when 2
-          samples[:CM] = line.strip.chomp
-        when 3
-          samples[:DIO] = line.strip.chomp
-        else
-          sample = line.strip.chomp
-          if ( !sample.nil? && sample.size > 0 )
-            samples["ADC#{adc_sample}".to_sym] = line.strip.chomp
-            adc_sample += 1
-          end
+        if response.match("ERROR")
+          samples[:ERROR] = "ERROR"
+          return samples
         end
 
-        linenum += 1
-      end
+        # otherwise parse input data
+        response.each_line do | line |
+          case linenum
+          when 1
+            samples[:NUM] = line.to_i
+          when 2
+            samples[:CM] = line.strip.chomp
+          when 3
+            samples[:DIO] = line.strip.chomp
+          else
+            sample = line.strip.chomp
+            if ( !sample.nil? && sample.size > 0 )
+              samples["ADC#{adc_sample}".to_sym] = line.strip.chomp
+              adc_sample += 1
+            end
+          end
 
-      @xbee_serialport.read_timeout = tmp
-      samples
+          linenum += 1
+        end
+
+        @xbee_serialport.read_timeout = tmp
+        samples
+      end
     end
 
     ##
@@ -510,7 +517,7 @@ module XBee
     # is no undo for this operation
     def save!
       @xbee_serialport.write("ATWR\r")
-      getresponse
+      getresponse if self.transmission_mode == :SYNC
     end
 
     ##
@@ -560,7 +567,6 @@ module XBee
       @xbee_serialport.write( message )
     end
 
-
     ##
     # exits the AT command mode - all changed parameters will take effect such as baud rate changes
     # after the exit is complete.   exit_command_mode does not permanently save the parameter changes
@@ -571,7 +577,6 @@ module XBee
 
     ##
     # returns the version of this class
-
     def version
       VERSION
     end

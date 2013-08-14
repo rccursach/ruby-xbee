@@ -3,8 +3,8 @@ require 'simplecov'
 require 'minitest/autorun'
 require 'minitest/reporters'
 
-SimpleCov.command_name 'MiniTest'
-SimpleCov.start
+#SimpleCov.command_name 'MiniTest'
+#SimpleCov.start
 MiniTest::Reporters.use!
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
