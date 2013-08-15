@@ -1,5 +1,6 @@
 $: << File.dirname(__FILE__)
 require 'test_helper'
+require 'version'
 
 # The most simple test there can possibly BE, let's check constant for constant
 class RubyXbeeTest < MiniTest::Unit::TestCase
