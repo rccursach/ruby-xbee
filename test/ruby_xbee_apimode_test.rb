@@ -1,11 +1,16 @@
 $: << File.dirname(__FILE__)
 require 'test_helper'
+require 'ruby-xbee'
 
+##
+# The goal of these tests is simply to instantiate the main XBee class for
+# API mode access. If a device is present and configured a simple association
+# check retrieval is made.
 class RubyXbeeApimodeSetup < MiniTest::Unit::TestCase
   def setup
     @xbee_missing = false
     @uart_config = XBee::Config::XBeeUARTConfig.new()
-    @xbee_usbdev_str = '/dev/tty.usbserial-A101KYF6'
+    @xbee_usbdev_str = TOPLEVEL_BINDING.eval('self').instance_variable_get(:@xbee_usbdev_str)
     begin
       @xbee = XBee::BaseAPIModeInterface.new(@xbee_usbdev_str, @uart_config, :API, :SYNC)
     rescue

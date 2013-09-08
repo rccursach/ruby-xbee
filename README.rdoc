@@ -27,9 +27,7 @@ http://www.digi.com/products/embeddedsolutions/zigbeesolutions/
 * Ruby::XBee is a quick way to experiment with functionality of XBees.
 * Ruby::XBee can alleviate the need to memorize lots of AT modem commands and their parameters.
 * Since Digi has no configuration host support for Linux or OS X, if these are your native or preferred environments, Ruby::XBee may be for you.
-* Ruby::XBee is open source and contributions are welcome.  See RELEASE notes TODO section for areas of solicited contributions. 
-
-If you'd like to contact the author, see http://sawdust.see-do.org/businesscard/businesscard.html 
+* Ruby::XBee is open source and contributions are welcome.
 
 == Ruby::XBee Documentation
 
@@ -44,24 +42,18 @@ a significant area of solicited contributions.
 Example use of the core XBee ruby class can be found in the utilities themselves:
 xbeeinfo.rb, xbeeconfigure.rb, xbeedio.rb, xbeelisten.rb, xbeesend.rb
 
-Additional examples may be posted on http://sawdust.see-do.org as time goes on.
-
 == Quick Start
-0. install ruby 1.8.7 for your platform (see http://www.ruby-lang.org)
-1. download the ruby-xbee tarball ( http://sawdust.see-do.org/ruby-xbee/ruby-xbee-downloads.html )
-2. tar extract the bundle into its permanent directory
-3. make a symlink for serial-port-0.6
-4. determine your /dev string and configure that in config/xbeeconfig.rb
-5. try ./xbeeinfo.rb
+0. install ruby 1.9.3 or 2.0.0 for your platform (see http://www.ruby-lang.org)
+1. download the ruby-xbee ( git clone https://github.com/exsilium/ruby-xbee )
+2. determine your /dev string and configure that in bin/ruby-xbee.rb
+3. try ./bin/xbeeinfo.rb
 
 == Detailed Quick Start
-=== tar extract the bundle into the directory where you want to use the package.  
+=== clone the ruby-xbee repository.  
 
-   tar xvfz ruby-xbee-<version>.tar.gz
+   git clone https://github.com/exsilium/ruby-xbee
 
-where <version> is the latest ruby-xbee version you downloaded.
-
-=== Determine your /dev string and configure that in config/xbeeconfig.rb (BORKEN!)
+=== Determine your /dev string and configure that in bin/ruby-xbee.rb
 
 When you plug in your XBee using an USB explorer board such as the Sparkfun XBee explorer:
 
@@ -79,12 +71,12 @@ a device such as:
 Each USB device has a unique tag so your device will not be named exactly the same as
 this example.
 
-Once you determine the device name, edit the ruby-xbee/conf/xbeeconfig.rb file and 
+Once you determine the device name, edit the ruby-xbee/bin/ruby-xbee.rb file and 
 modify the @xbee_usbdev_str to match your device.  Example:
 
   @xbee_usbdev_str = "/dev/tty.usbserial-A80081sF" 
 
-save the xbeeconfig.rb file. (BORKEN: There is no more xbeeconfig.rb file, currently the device is hardcoded in bin/ruby-xbee.rb)
+save the ruby-xbee.rb file.
 
 === Build and install the RubyGem
 
@@ -193,7 +185,7 @@ A platform-specific version of the SerialPort is a prerequisite for Ruby::XBee. 
 refer to Rubygems ( http://rubygems.org/gems/serialport ) for package information.
 
 * *Prerequisites* - Ruby 1.9.3
-To date, all testing has been done using Ruby 1.9.3 (p194). There has been extensive
+To date, all testing has been done using Ruby 1.9.3 (p194) & 2.0.0. There has been extensive
 changes introduced to Ruby after 1.8.x branch and backwards compatibility is not esnured.
 Please refer to earlier versions of this software.
 

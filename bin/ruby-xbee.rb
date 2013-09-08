@@ -2,7 +2,7 @@
 begin
   require 'rubygems'
   gem 'ruby-xbee'
-# rescue LoadError => e
+rescue LoadError => e
   load_path_addition = File.dirname(File.dirname(__FILE__)) + "/lib"
   puts "Falling back to extended load path #{load_path_addition}"
   $: << load_path_addition

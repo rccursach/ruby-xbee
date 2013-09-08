@@ -9,17 +9,17 @@ module XBee
 
       def modem_statuses
         [
-          [1, :Hardware_Reset],
-          [2, :Watchdog_Timer_Reset],
-          [3, :Associated],
+          [0, :Hardware_Reset],
+          [1, :Watchdog_Timer_Reset],
+          [2, :Associated],
         ]
       end
 
       def cmd_data=(data_string)
-        status_byte = data_string.unpack("c")
+        status_byte = data_string.unpack("c")[0]
         # update status ivar for later use
         self.status = case status_byte
-        when 1..3
+        when 0..2
           modem_statuses.assoc(status_byte)
         else
           raise "ModemStatus frame appears to include an invalid status value: #{data_string}"
