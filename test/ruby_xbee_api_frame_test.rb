@@ -96,7 +96,7 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
     
     assert_output("Initializing a ReceivedFrame of type 0x8\n") {
       xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01NJ\xFF", xbee_frame.cmd_data)
+      assert_equal("\x01NJ\xFF".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
   end
   
@@ -139,7 +139,7 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
     end
     assert_output("Initializing a ReceivedFrame of type 0x17\n") {
       xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x01\x23\x45\x67\x89\xAB\xCD\xEF\xFC\xFE\x02D1\x03", xbee_frame.cmd_data)
+      assert_equal("\x01\x01\x23\x45\x67\x89\xAB\xCD\xEF\xFC\xFE\x02D1\x03".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
   end
   
@@ -245,7 +245,7 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
     
     assert_output("Initializing a ReceivedFrame of type 0x8b\n") {
       xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x7d\x84\x00\x00\x01", xbee_frame.cmd_data)
+      assert_equal("\x01\x7d\x84\x00\x00\x01".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
   end
   
