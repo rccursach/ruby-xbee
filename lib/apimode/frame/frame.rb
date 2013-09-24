@@ -66,7 +66,9 @@ module XBee
           ReceivePacket.new(data)
         when 0x91 
           ExplicitRxIndicator.new(data)
-        else 
+        when 0x92
+          IODataSampleRxIndicator.new(data)
+        else
           ReceivedFrame.new(data)
       end
       rescue EOFError
@@ -111,6 +113,7 @@ require 'at_command'
 require 'at_command_response'
 require 'explicit_addressing_command'
 require 'explicit_rx_indicator'
+require 'io_data_sample_rx_indicator'
 require 'modem_status'
 require 'receive_packet'
 require 'remote_command_request'
