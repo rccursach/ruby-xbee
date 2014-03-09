@@ -6,6 +6,7 @@ require './lib/version.rb'
 Gem::Specification.new do |s|
   s.name = %q{ruby-xbee}
   s.version = XBee::Version::STRING
+  s.licenses = ['AGPL']
   s.platform = Gem::Platform::RUBY
 
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
@@ -55,5 +56,5 @@ Gem::Specification.new do |s|
   s.test_files = %w(test/ruby_xbee_test.rb
                     test/test_helper.rb)
 
-  s.add_runtime_dependency(%q<serialport>, ['>= 1.1.0'])
+  s.add_runtime_dependency(%q<serialport>, ['~> 1.1', '>= 1.1.0'])
 end
