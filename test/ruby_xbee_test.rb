@@ -3,7 +3,7 @@ require 'test_helper'
 require 'version'
 
 # The most simple test there can possibly BE, let's check constant for constant
-class RubyXbeeTest < MiniTest::Unit::TestCase
+class RubyXbeeTest < MiniTest::Test
   def setup
       @xbee_version_major = ::XBee::Version::MAJOR
       @xbee_version_minor = ::XBee::Version::MINOR

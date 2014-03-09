@@ -6,7 +6,7 @@ require 'ruby-xbee'
 # The goal of these tests is simply to instantiate the main XBee class for
 # API mode access. If a device is present and configured a simple association
 # check retrieval is made.
-class RubyXbeeApimodeSetup < MiniTest::Unit::TestCase
+class RubyXbeeApimodeSetup < MiniTest::Test
   def setup
     @xbee_missing = false
     @uart_config = XBee::Config::XBeeUARTConfig.new()

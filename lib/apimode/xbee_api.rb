@@ -3,10 +3,41 @@ require 'frame/frame'
 require File.dirname(File.dirname(__FILE__)) + '/ruby_xbee'
 
 module XBee
+  ##
+  # This is the main class for API mode for XBee radios.
   class BaseAPIModeInterface < RFModule
   
     VERSION = "1.1.0" # Version of this class
-  
+
+    ##
+    # ==== Attributes
+    # * +xbee_usbdev_str+ - USB Device as a string
+    #
+    # ==== Options
+    # * +uart_config+ - XBeeUARTConfig
+    # * +operation_mode+ - Either :AT or :API for XBee operation mode
+    # * +transmission_mode+ - :SYNC for Synchronous communication or :ASYNC for Asynchonrous communication.
+    #
+    # A note on the asynchronous vs synchronous communication modes - A 
+    # simplistic network of a few XBee nodes can pretty much work according to 
+    # expected flows where requests and responses are always handled in
+    # synchronous ways. However, if bigger radio networks are being deployed
+    # (real scenarios) you cannot guarantee the synchronous nature of the network.
+    # You will have nodes joining/removing themselves, sleeping, sending data
+    # samples etc. Although the default behaviour is set as :SYNC, if you have a
+    # real network, then by design the network is Asynchronous, use :ASYNC instead.
+    # Otherwise you will most definitely run into "Invalid responses" issues.
+    #
+    # For handling the Asynchronous communication logic, use an external Queue
+    # and database to effectively handle the command/response and other frames
+    # that are concurrently being conversed on the PAN.
+    #
+    # ==== Example
+    #   require 'ruby_xbee'
+    #   @uart_config = XBee::Config::XBeeUARTConfig.new()
+    #   @xbee_usbdev_str = '/dev/tty.usbserial-A101KYF6'
+    #   @xbee = XBee::BaseAPIModeInterface.new(@xbee_usbdev_str, @uart_config, :API, :ASYNC)
+    #  
     def initialize(xbee_usbdev_str, uart_config = XBeeUARTConfig.new, operation_mode = :AT, transmission_mode = :SYNC)
       super(xbee_usbdev_str, uart_config, operation_mode, transmission_mode)
       @frame_id = 1

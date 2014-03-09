@@ -21,14 +21,14 @@ require 'socket'
 # o - 0x8b - ZigBee Transmit Status
 # x - 0x90 - ZigBee Receive Packet (AO=0)
 # x - 0x91 - ZigBee Explicit Rx Indicator (AO=1)
-# x - 0x92 - ZigBee IO Data Sample Rx Indicator 
+# o - 0x92 - ZigBee IO Data Sample Rx Indicator 
 # x - 0x94 - XBee Sensor Read Indicator (AO=0)
 # x - 0x95 - Node Identification Indicator (AO=0)
 # o - 0x97 - Remote Command Response
 # x - 0xA0 - Over-the-Air Firmware Update Status
 # x - 0xA1 - Route Record Indicator
 # x - 0xA3 - Many-to-One Route Request Indicator
-class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
+class RubyXbeeApiFrameTest < MiniTest::Test
   def setup
     @unix_socket = '/tmp/ruby-xbee-test.sock'
     File.delete( @unix_socket ) if FileTest.exists?( @unix_socket )
@@ -203,6 +203,7 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
       runtimeerror_raised = assert_raises(RuntimeError) {
         xbee_frame = XBee::Frame.new(@s);
       }
+      assert_equal("ModemStatus frame appears to include an invalid status value: 0x06", runtimeerror_raised.message)
     }
   end
   
@@ -246,6 +247,36 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
     assert_output("Initializing a ReceivedFrame of type 0x8b\n") {
       xbee_frame = XBee::Frame.new(@s)
       assert_equal("\x01\x7d\x84\x00\x00\x01".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    }
+  end
+  
+  ##
+  # ZigBee IO Data Sample Rx Indicator (0x92)
+  # When the module receives an IO sample fram efrom remote device, it sends the
+  # sample out the UART using this frame (when AO=0). Only modules running API
+  # firmware will send IO samples out the UART. In a wireless sensor network
+  # this frame is probably the most important data carrier for sensory payloads.
+  # +----------------------------+
+  # |___________Header___________|
+  # | SDelim | DlenMSB | DlenLSB |
+  # +--------+---------+---------+
+  # |  0x7e  |   0x00  |   0x14  |
+  # +--------+---------+---------+------------------------------------------------------------------------------------+------+
+  # |______________________________________________________Frame______________________________________________________|      |
+  # | Type | 64-bitRemoteSource | SNet16 | ReceiveOptions | NoOfSamples | DChanlMask | AChanlMask | DSample | ASample | CSum |
+  # +------+--------------------+--------+----------------+-------------+------------+------------+---------+---------+------+
+  # | 0x92 | 0x0012a20040522baa | 0x7c84 |      0x01      |     0x01    |   0x001c   |    0x02    | 0x0014  | 0x0225  | 0xf7 |
+  # +------+--------------------+--------+----------------+-------------+------------+------------+---------+---------+------+
+  def test_zigbee_io_data_sample_rx_indicator
+    Thread.fork(@server.accept) do |client|
+      f = [ 0x7e, 0x00, 0x14, 0x92, 0x00, 0x12, 0xa2, 0x00, 0x40, 0x52, 0x2b, 0xaa, 0x7c, 0x84, 0x01, 0x01, 0x00, 0x1c, 0x02, 0x00, 0x14, 0x02, 0x25, 0xf7 ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+    
+    assert_output("Initializing a ReceivedFrame of type 0x92\n") {
+        xbee_frame = XBee::Frame.new(@s)
+        assert_equal("\x00\x12\xa2\x00\x40\x52\x2b\xaa\x7c\x84\x01\x01\x00\x1c\x02\x00\x14\x02\x25".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
   end
   
@@ -296,31 +327,26 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
   end
   
   ##
-  # ZigBee IO Data Sample Rx Indicator (0x92)
-  # When the module receives an IO sample fram efrom remote device, it sends the
-  # sample out the UART using this frame (when AO=0). Only modules running API
-  # firmware will send IO samples out the UART. In a wireless sensor network
-  # this frame is probably the most important data carrier for sensory payloads.
-  # +----------------------------+
-  # |___________Header___________|
-  # | SDelim | DlenMSB | DlenLSB |
-  # +--------+---------+---------+
-  # |  0x7e  |   0x00  |   0x14  |
-  # +--------+---------+---------+------------------------------------------------------------------------------------+------+
-  # |______________________________________________________Frame______________________________________________________|      |
-  # | Type | 64-bitRemoteSource | SNet16 | ReceiveOptions | NoOfSamples | DChanlMask | AChanlMask | DSample | ASample | CSum |
-  # +------+--------------------+--------+----------------+-------------+------------+------------+---------+---------+------+
-  # | 0x92 | 0x0012a20040522baa | 0x7c84 |      0x01      |     0x01    |   0x001c   |    0x02    | 0x0014  | 0x0225  | 0xf7 |
-  # +------+--------------------+--------+----------------+-------------+------------+------------+---------+---------+------+
-  def test_zigbee_io_data_sample_rx_indicator
+  # Remote Command Response (0x97) - Invalid status byte
+  # At the moment this is generic ReceivedFrame where api_identifier and cmd_data are populated
+  # +----------------------------+---------------------------------------------------------------------------+------+
+  # |___________Header___________|___________________________________Frame___________________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | ID | 64-bitRemoteSource | SNet16 |   A T   | CStatus | CommandData | CSum |
+  # +--------+---------+---------+------+----+--------------------+--------+---------+---------+-------------+------+
+  # |  0x7e  |   0x00  |   0x13  | 0x97 |0x04| 0x0012a20040522baa | 0x7c84 |0x53|0x4c|   0x05  | 0x40522baa  | 0x3e |
+  # +--------+---------+---------+------+----+--------------------+--------+---------+---------+-------------+------+
+  def test_remote_command_response_invalid_status_byte
     Thread.fork(@server.accept) do |client|
-      f = [ 0x7e, 0x00, 0x14, 0x92, 0x00, 0x12, 0xa2, 0x00, 0x40, 0x52, 0x2b, 0xaa, 0x7c, 0x84, 0x01, 0x01, 0x00, 0x1c, 0x02, 0x00, 0x14, 0x02, 0x25, 0xf7 ]
+      f = [ 0x7e, 0x00, 0x13, 0x97, 0x04, 0x00, 0x12, 0xa2, 0x00, 0x40, 0x52, 0x2b, 0xaa, 0x7c, 0x84, 0x53, 0x4c, 0x05, 0x40, 0x52, 0x2b, 0xaa, 0x3e ]
       client.write(f.pack("c*"))
       client.close
     end
     
-    assert_output("Initializing a ReceivedFrame of type 0x92\n") {
+    assert_output("Initializing a ReceivedFrame of type 0x97\n") {
+      runtimeerror_raised = assert_raises(RuntimeError) {
         xbee_frame = XBee::Frame.new(@s)
+      }
+      assert_equal("AT Command Response frame appears to include an invalid status: 0x05", runtimeerror_raised.message)
     }
   end
   

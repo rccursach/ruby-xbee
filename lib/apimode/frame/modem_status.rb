@@ -22,7 +22,7 @@ module XBee
         when 0..2
           modem_statuses.assoc(status_byte)
         else
-          raise "ModemStatus frame appears to include an invalid status value: #{data_string}"
+          raise "ModemStatus frame appears to include an invalid status value: 0x%02x" % status_byte
         end
         #actually assign and move along
         @cmd_data = data_string

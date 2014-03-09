@@ -12,7 +12,7 @@ module XBee
         when 0..4
           command_statuses[status_byte]
         else
-          raise "AT Command Response frame appears to include an invalid status: 0x%x" % status_byte
+          raise "AT Command Response frame appears to include an invalid status: 0x%02x" % status_byte
         end
         #actually assign and move along
         @cmd_data = data_string

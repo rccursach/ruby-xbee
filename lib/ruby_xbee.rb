@@ -86,10 +86,10 @@ module XBee
         raise "uart_config must be an instance of XBeeUARTConfig for this to work"
       end
       unless operation_mode == :AT || operation_mode == :API
-        raise "XBee operation_mode must be either AT or API"
+        raise "XBee operation_mode must be either :AT or :API"
       end
       unless transmission_mode == :SYNC || transmission_mode == :ASYNC
-        raise "XBee transmission_mode must be either SYNC (Synchronous) or ASYNC (Asynchronous)"
+        raise "XBee transmission_mode must be either :SYNC (Synchronous) or :ASYNC (Asynchronous)"
       end
       self.xbee_uart_config = uart_config
       @xbee_serialport = SerialPort.new( xbee_usbdev_str, uart_config.baud, uart_config.data_bits, uart_config.stop_bits, uart_config.parity )
