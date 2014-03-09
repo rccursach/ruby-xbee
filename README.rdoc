@@ -22,7 +22,7 @@ Some XBees can be configured to support the ZigBee standard.  Other XBees suppor
 various forms of proprietary mesh networking especially suited to scaling sensor networks.
 
 To learn more about Digi's XBee modules, see Digi's web site at:
-http://www.digi.com/products/embeddedsolutions/zigbeesolutions/
+http://www.digi.com/products/wireless-wired-embedded-solutions/zigbee-rf-modules/zigbee-mesh-module/
 
 == Why use Ruby::XBee?
 
@@ -61,7 +61,7 @@ xbeeinfo.rb, xbeeconfigure.rb, xbeedio.rb, xbeelisten.rb, xbeesend.rb
 
 When you plug in your XBee using an USB explorer board such as the Sparkfun XBee explorer:
 
-http://www.sparkfun.com/commerce/product_info.php?products_id=8687
+https://www.sparkfun.com/products/8687
 
 a new device will appear in the /dev directory of your Mac or Linux machine.  As a hint,
 look for a device such as /dev/tty.usb* or /dev/ttyUSB*
@@ -136,7 +136,7 @@ XBee won't respond:
 * Insure your device's USB driver is enumerated in the /dev directory when you plug in USB
 * Insure your XBee device and Ruby::XBee baud rate configuration is identical
 * Digi's XBee development boards do not have USB drivers for OS X or Linux.
-  I recommend using SparkFun USB XBee Explorer board: http://www.sparkfun.com/commerce/product_info.php?products_id=8687
+  I recommend using SparkFun USB XBee Explorer board: https://www.sparkfun.com/products/8687
   This board supports drivers that are compatible with OS X and Linux operating systems.  This board
   can be used with Digi's X-CTU windows configuration utility as well, so it's a great board to have
   if you're working with XBee on various platforms.
@@ -179,9 +179,9 @@ Current host platforms supported:
   Mac OS X (PPC or Intel) 
 
 == Release Notes
-x/x/2013 Ruby::XBee Version 1.1 - Requirements: Ruby 1.9.3; serialport 1.1.0
+2014-03-09 Ruby::XBee Version 1.1 - Requirements: Ruby 1.9.3; serialport 1.1.0
 
-1/2/2009 Ruby::XBee Version 1.0 - Requirements: Ruby 1.8.7; ruby-serialport
+2009-01-02 Ruby::XBee Version 1.0 - Requirements: Ruby 1.8.7; ruby-serialport
 
 == Prerequisites
 * *Prerequisites* - SerialPort
@@ -193,23 +193,16 @@ To date, all testing has been done using Ruby 1.9.3 (p194) & 2.0.0. There has be
 changes introduced to Ruby after 1.8.x branch and backwards compatibility is not esnured.
 Please refer to earlier versions of this software.
 
-== TODO
-* need a volunteer to port Ruby::XBee to Windows - perhaps Cygwin or raw Windows cmd
-* make Ruby::XBee into a gem
-* Write a ruby utility to flash XBee firmware in order to alleviate the need to use X-CTU for that chore 
-* Support XBee's API mode  - lots of new work to be done - major nice upgrade to get this in
-* Support other XBee modules and firmware (ZNet, ZigBee, DigiNet) - lots of new work to be done
-
 == Bugs
-I'm sure there are bugs.  Please test and submit a detailed report to landon att 360vl com
-Better yet, please submit a patch for a fix.  Thanks.
+I'm sure there are bugs.  Please test and submit a detailed report to github issues.
+Better yet, please submit a patch for a fix. Thanks.
 
 == Feature Requests
 
 Original author can be reached by checking http://www.esawdust.com/blog/ for updates and
 sending feature requests to landon att 360vl com
 
-Current maintainer can be reached by sending e-mail to exile att chamber ee
+Current maintainer can be reached by sending e-mail to exile att chamber ee or filing a issue via github.
 
 == Generating Ruby::XBee RDoc 
 
@@ -234,6 +227,6 @@ Mike Ashmore's version can be obtained via GitHub: https://github.com/motomike/r
 
 Copyright (c) 2008-2009 360VL, Inc. and Landon Cox 
 Copyright (c) 2009 Mike Ashmore
-Copyright (c) 2013 Sten Feldman
+Copyright (c) 2013-2014 Sten Feldman
 
 See LICENSE for details.

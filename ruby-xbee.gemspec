@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
 
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
-  s.authors = ['Sten Feldman']
-  s.date = %q{2013-03-15}
+  s.authors = ['Landon Cox', 'Mike Ashmore', 'Sten Feldman']
+  s.date = %q{2014-03-09}
   s.email = %q{exile@chamber.ee}
   s.executables = %w(apicontrol.rb apilisten.rb ruby-xbee.rb xbeeconfigure.rb xbeedio.rb xbeeinfo.rb xbeelisten.rb xbeesend.rb)
   s.extra_rdoc_files = %w(LICENSE agpl.txt README.rdoc)
