@@ -1,6 +1,8 @@
 = ruby-xbee
 {<img src="https://travis-ci.org/exsilium/ruby-xbee.png" />}[https://travis-ci.org/exsilium/ruby-xbee]
 {<img src="https://coveralls.io/repos/exsilium/ruby-xbee/badge.png" alt="Coverage Status" />}[https://coveralls.io/r/exsilium/ruby-xbee]
+{<img src="https://gemnasium.com/exsilium/ruby-xbee.png" alt="Dependency Status" />}[https://gemnasium.com/exsilium/ruby-xbee]
+{<img src="https://codeclimate.com/github/exsilium/ruby-xbee.png" />}[https://codeclimate.com/github/exsilium/ruby-xbee]
 
 == Ruby::XBee - What is it?
 Ruby::XBee lets you configure and access Digi XBee RF devices using ruby classes and ruby-based 
