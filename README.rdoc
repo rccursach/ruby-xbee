@@ -47,10 +47,11 @@ Example use of the core XBee ruby class can be found in the utilities themselves
 xbeeinfo.rb, xbeeconfigure.rb, xbeedio.rb, xbeelisten.rb, xbeesend.rb
 
 == Quick Start
-0. install ruby 1.9.3 or 2.0.0 for your platform (see http://www.ruby-lang.org)
-1. download the ruby-xbee ( git clone https://github.com/exsilium/ruby-xbee )
-2. determine your /dev string and configure that in bin/ruby-xbee.rb
-3. try ./bin/xbeeinfo.rb
+1. install ruby 1.9.3 or 2.0.0 for your platform (see http://www.ruby-lang.org)
+2. download the ruby-xbee ( git clone https://github.com/exsilium/ruby-xbee )
+3. install the dependencies `bundle install`
+4. determine your /dev string and configure that in bin/ruby-xbee.rb
+5. try ./bin/xbeeinfo.rb
 
 == Detailed Quick Start
 === clone the ruby-xbee repository.  
