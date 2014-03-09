@@ -86,8 +86,8 @@ save the ruby-xbee.rb file.
 
 If you are relying on rvm, please set the appropriate gemset prior
 
-	gem build ruby-xbee.gemspec
-	gem install ruby-xbee-<version>.gem
+  gem build ruby-xbee.gemspec
+  gem install ruby-xbee-<version>.gem
 
 === Try xbeeinfo.rb
 
