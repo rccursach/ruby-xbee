@@ -274,8 +274,7 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
   
   ##
   # Remote Command Response (0x97) - Remote Command Transmission Failed
-  # (currently this is unimplemented and raises a RuntimeError)
-  # BORKEN
+  # At the moment this is generic ReceivedFrame where api_identifier and cmd_data are populated
   # +----------------------------+---------------------------------------------------------------------------+------+
   # |___________Header___________|___________________________________Frame___________________________________|      |
   # | SDelim | DlenMSB | DlenLSB | Type | ID | 64-bitRemoteSource | SNet16 |   A T   | CStatus | CommandData | CSum |
@@ -290,9 +289,9 @@ class RubyXbeeApiFrameTest < MiniTest::Unit::TestCase
     end
     
     assert_output("Initializing a ReceivedFrame of type 0x97\n") {
-      runtimeerror_raised = assert_raises(RuntimeError) {
-        xbee_frame = XBee::Frame.new(@s)
-      }
+      xbee_frame = XBee::Frame.new(@s)
+      assert_equal("\x97".force_encoding("iso-8859-1"), xbee_frame.api_identifier.force_encoding("iso-8859-1"))
+      assert_equal("\x04\x00\x12\xa2\x00\x40\x52\x2b\xaa\x7c\x84\x53\x4c\x04\x40\x52\x2b\xaa".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
   end
   
