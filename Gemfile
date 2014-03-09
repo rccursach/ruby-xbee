@@ -12,7 +12,8 @@ end
 
 group :test do
   gem 'VersionCheck',        '~> 1.0.0', :require => false
-  gem 'simplecov',          '~> 0.7.0', :require => false
-  gem 'minitest',           '~> 4.7.0', :require => false
+  gem 'simplecov',          '~> 0.7.0',  :require => false
+  gem 'minitest',           '~> 4.7.0',  :require => false
   gem 'minitest-reporters', '>= 0.14.0', :require => false
+  gem 'coveralls',                       :require => false
 end
