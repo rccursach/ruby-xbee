@@ -30,10 +30,15 @@ require 'socket'
 # x - 0xA3 - Many-to-One Route Request Indicator
 class RubyXbeeApiFrameTest < MiniTest::Test
   def setup
-    @unix_socket = '/tmp/ruby-xbee-test.sock'
-    File.delete( @unix_socket ) if FileTest.exists?( @unix_socket )
-    @server = UNIXServer.new(@unix_socket)
-    @s = UNIXSocket.open(@unix_socket)
+    if ENV['OS'] != "Windows_NT"
+      @unix_socket = '/tmp/ruby-xbee-test.sock'
+      File.delete( @unix_socket ) if FileTest.exists?( @unix_socket )
+      @server = UNIXServer.new(@unix_socket)
+      @s = UNIXSocket.open(@unix_socket)
+    else
+      @server = TCPServer.new(2000)
+      @s = TCPSocket.new('localhost', 2000)
+    end
   end
 
   ##
@@ -119,6 +124,27 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       xbee_frame = XBee::Frame.new(@s)
       assert_equal("\x01ND", xbee_frame.cmd_data)
     }
+  end
+  
+  ##
+  # AT Command - Queue Parameter Value (0x09); AT = BD
+  # +----------------------------+-----------------------------+------+
+  # |___________Header___________|____________Frame____________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | ID |   A T   | (Par) | CSum |
+  # +--------+---------+---------+------+----+---------+-------+------+
+  # |  0x7e  |   0x00  |   0x05  | 0x09 |0x01|0x42|0x44|  0x07 | 0x68 |
+  # +--------+---------+---------+------+----+-----------------+------+  
+  def test_at_command_queue_parameter_value
+    Thread.fork(@server.accept) do |client|
+      f = [ 0x7e, 0x00, 0x05, 0x09, 0x01, 0x42, 0x44, 0x07, 0x68 ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+    
+    assert_output("Initializing a ReceivedFrame of type 0x9\n") {
+      xbee_frame = XBee::Frame.new(@s)
+      assert_equal("\x01BD\x07".force_encoding("iso-8859-1"), xbee_frame.cmd_data)
+    }    
   end
   
   ##
@@ -355,7 +381,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
   def teardown
     @s.close
     @server.close
-    File.delete( @unix_socket ) if FileTest.exists?( @unix_socket )
+    unless ENV['OS'] == "Windows_NT"
+      File.delete( @unix_socket ) if FileTest.exists?( @unix_socket )
+    end
   end
 
 end
