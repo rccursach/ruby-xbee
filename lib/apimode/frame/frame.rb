@@ -99,9 +99,9 @@ module XBee
         # raise "Frame data must be an enumerable type" unless frame_data.kind_of?(Enumerable)
         self.api_identifier = frame_data[0]
         if $DEBUG then
-          print "Initializing a ReceivedFrame of type 0x%x | " % self.api_identifier.unpack('H*').join.to_i(16)
+          print "Initializing a ReceivedFrame of type 0x%02x | " % self.api_identifier.unpack('H*').join.to_i(16)
         else
-          puts "Initializing a ReceivedFrame of type 0x%x" % self.api_identifier.unpack('H*').join.to_i(16)
+          puts "Initializing a ReceivedFrame of type 0x%02x" % self.api_identifier.unpack('H*').join.to_i(16)
         end
         self.cmd_data = frame_data[1..-1]
       end

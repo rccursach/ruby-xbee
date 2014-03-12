@@ -11,8 +11,8 @@ require 'socket'
 # Currently known frames, o = covered by test frames
 # ==================================================
 # o - 0x08 - AT Command
-# x - 0x09 - AT Command - Queue Parameter Value
-# x - 0x10 - ZigBee Transmit Request
+# o - 0x09 - AT Command - Queue Parameter Value
+# o - 0x10 - ZigBee Transmit Request
 # x - 0x11 - Explicit Addressing ZigBee Command Frame
 # o - 0x17 - Remote Command Request
 # x - 0x21 - Create Source Route 
@@ -57,7 +57,7 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
       
-    assert_output("Initializing a ReceivedFrame of type 0x0\n") {
+    assert_output("Initializing a ReceivedFrame of type 0x00\n") {
       xbee_frame = XBee::Frame.new(@s)
     }
   end
@@ -99,7 +99,7 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
     
-    assert_output("Initializing a ReceivedFrame of type 0x8\n") {
+    assert_output("Initializing a ReceivedFrame of type 0x08\n") {
       xbee_frame = XBee::Frame.new(@s)
       assert_equal("\x01NJ\xFF".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
@@ -120,9 +120,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
     
-    assert_output("Initializing a ReceivedFrame of type 0x8\n") {
+    assert_output("Initializing a ReceivedFrame of type 0x08\n") {
       xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01ND", xbee_frame.cmd_data)
+      assert_equal("\x01ND".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }
   end
   
@@ -141,10 +141,40 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
     
-    assert_output("Initializing a ReceivedFrame of type 0x9\n") {
+    assert_output("Initializing a ReceivedFrame of type 0x09\n") {
       xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01BD\x07".force_encoding("iso-8859-1"), xbee_frame.cmd_data)
+      assert_equal("\x01BD\x07".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
     }    
+  end
+  
+  ##
+  # ZigBee Transmit Request (0x10)
+  # A Transmit Request API frame causes the module to send data as an RF packet
+  # to the specified destination.
+  # +----------------------------+-----------------------------------------------------------------------------------+------+
+  # |___________Header___________|_________________________________Frame_____________________________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | ID | 64-bitDestination  | Dest16 | BCRadius | Options |       RF Data      | CSum |
+  # +--------+---------+---------+------+----+--------------------+--------+----------+---------+--------------------+------+
+  # |  0x7e  |   0x00  |   0x16  | 0x10 |0x01| 0x0013a200400a0127 | 0xfffe |   0x00   |   0x00  | 0x5478446174613041 | 0x13 |
+  # +--------+---------+---------+------+----+--------------------+--------+----------+---------+--------------------+------+
+  def test_zigbee_transmit_request
+    Thread.fork(@server.accept) do |client|
+      f = [ 0x7e, 0x00, 0x16, 0x10, 0x01, 0x00, 0x13, 0xa2, 0x00, 0x40, 0x0a, 0x01, 0x27, 0xff, 0xfe, 0x00, 0x00, 0x54, 0x78,
+            0x44, 0x61, 0x74, 0x61, 0x30, 0x41, 0x13 ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+    assert_output("Initializing a ReceivedFrame of type 0x10\n") {
+      xbee_frame = XBee::Frame.new(@s)
+      assert_equal("\x01\x00\x13\xa2\x00\x40\x0a\x01\x27\xff\xfe\x00\x00\x54\x78\x44\x61\x74\x61\x30\x41".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    }    
+  end
+  
+  ##
+  # Explicit Addressing ZigBee Command Frame (0x11)
+  # This allows ZigBee application layer fields (endpoint and cluster ID) to be specified for a data transmission.
+  def test_explicit_addressing_zigbee
+  
   end
   
   ##
