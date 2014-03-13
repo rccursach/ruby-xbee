@@ -13,10 +13,10 @@ require 'socket'
 # o - 0x08 - AT Command
 # o - 0x09 - AT Command - Queue Parameter Value
 # o - 0x10 - ZigBee Transmit Request
-# x - 0x11 - Explicit Addressing ZigBee Command Frame
+# o - 0x11 - Explicit Addressing ZigBee Command Frame
 # o - 0x17 - Remote Command Request
-# x - 0x21 - Create Source Route 
-# x - 0x88 - AT Command Response
+# o - 0x21 - Create Source Route 
+# o - 0x88 - AT Command Response
 # o - 0x8a - Modem Status
 # o - 0x8b - ZigBee Transmit Status
 # x - 0x90 - ZigBee Receive Packet (AO=0)
@@ -152,7 +152,7 @@ class RubyXbeeApiFrameTest < MiniTest::Test
   # A Transmit Request API frame causes the module to send data as an RF packet
   # to the specified destination.
   # +----------------------------+-----------------------------------------------------------------------------------+------+
-  # |___________Header___________|_________________________________Frame_____________________________________________|      |
+  # |___________Header___________|_______________________________________Frame_______________________________________|      |
   # | SDelim | DlenMSB | DlenLSB | Type | ID | 64-bitDestination  | Dest16 | BCRadius | Options |       RF Data      | CSum |
   # +--------+---------+---------+------+----+--------------------+--------+----------+---------+--------------------+------+
   # |  0x7e  |   0x00  |   0x16  | 0x10 |0x01| 0x0013a200400a0127 | 0xfffe |   0x00   |   0x00  | 0x5478446174613041 | 0x13 |
@@ -173,8 +173,24 @@ class RubyXbeeApiFrameTest < MiniTest::Test
   ##
   # Explicit Addressing ZigBee Command Frame (0x11)
   # This allows ZigBee application layer fields (endpoint and cluster ID) to be specified for a data transmission.
+  # +----------------------------+--------------------------------------------------------------------------------------------------------------------------------+------+
+  # |___________Header___________|______________________________________________________________Frame_____________________________________________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | ID | 64-bitDestination  | Dest16 | SrcEndPnt | DestEndPnt | ClusterID | ProfileID | BCRadius | Options |  Data Payload  | CSum |
+  # +--------+---------+---------+------+----+--------------------+--------+-----------+------------+-----------+-----------+----------+---------+----------------+------+
+  # |  0x7e  |   0x00  |   0x1A  | 0x11 |0x01| 0x0000000000000000 | 0xfffe |    0xA0   |    0xA1    |   0x1554  |   0xC105  |   0x00   |  0x00   | 0x547844617461 | 0x3A |
+  # +--------+---------+---------+------+----+--------------------+--------+-----------+------------+-----------------------+----------+---------+----------------+------+
   def test_explicit_addressing_zigbee
-  
+    Thread.fork(@server.accept) do |client|
+      f = [ 0x7e, 0x00, 0x1a, 0x11, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0xff, 0xfe, 0xa0, 0xa1, 0x15, 0x54, 0xc1, 0x05, 0x00,
+            0x00, 0x54, 0x78, 0x44, 0x61, 0x74, 0x61, 0x3a ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+    assert_output("Initializing a ReceivedFrame of type 0x11\n") {
+      xbee_frame = XBee::Frame.new(@s)
+      assert_equal("\x01\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xa0\xa1\x15\x54\xc1\x05\x00\x00\x54\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    }    
   end
   
   ##
@@ -200,6 +216,28 @@ class RubyXbeeApiFrameTest < MiniTest::Test
   end
   
   ##
+  # Crete Source Route (0x21)
+  # This frame creates the source route in the module. A source route specifies
+  # the complete route a packet should traverse to get from source to destination.
+  # +----------------------------+----------------------------------------------------------------------------------------------+------+
+  # |___________Header___________|____________________________________________Frame_____________________________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | ID | CoordinatorAddress | Dest16 | RouteOpt | NumberOfAddr | Addr 1 | Addr 2 | Addr 3 | CSum |
+  # +--------+---------+---------+------+----+--------------------+--------+----------+--------------+--------+--------+--------+------+
+  # |  0x7e  |   0x00  |   0x14  | 0x21 |0x00| 0x0013a20040401122 | 0x3344 |   0x00   |     0x03     | 0xeeff | 0xccdd | 0xaabb | 0x01 |
+  # +--------+---------+---------+------+----+--------------------+--------+-------------------------+--------+--------+--------+------+
+  def test_create_source_route
+    Thread.fork(@server.accept) do |client|
+      f = [ 0x7e, 0x00, 0x14, 0x21, 0x00, 0x00, 0x13, 0xa2, 0x00, 0x40, 0x40, 0x11, 0x22, 0x33, 0x44, 0x00, 0x03, 0xee, 0xff, 0xcc, 0xdd, 0xaa, 0xbb, 01 ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+    assert_output("Initializing a ReceivedFrame of type 0x21\n") {
+      xbee_frame = XBee::Frame.new(@s)
+      assert_equal("\x00\x00\x13\xa2\x00\x40\x40\x11\x22\x33\x44\x00\x03\xee\xff\xcc\xdd\xaa\xbb".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    }
+  end
+  
+  ##
   # AT Command Response (0x88) are sent in a response to an AT Command. Some
   # commands trigger multiple responses, like the ATND (Node Discover) command.
   # AT = BD
@@ -207,10 +245,18 @@ class RubyXbeeApiFrameTest < MiniTest::Test
   # |___________Header___________|______________Frame______________|      |
   # | SDelim | DlenMSB | DlenLSB | Type | ID |   A T   |Status|Data| CSum |
   # +--------+---------+---------+------+----+---------+------+----+------+
-  # |  0x7e  |   0x00  |   0x05  | 0x88 |0x01|0x42|0x44| 0x00 |    | 0xF0 |
+  # |  0x7e  |   0x00  |   0x05  | 0x88 |0x01|0x42|0x44| 0x00 |    | 0xf0 |
   # +--------+---------+---------+------+----+----------------+----+------+
   def test_command_response
-      
+    Thread.fork(@server.accept) do |client|
+      f = [ 0x7e, 0x00, 0x05, 0x88, 0x01, 0x42, 0x44, 0x00, 0xf0 ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+    assert_output("Initializing a ReceivedFrame of type 0x88\n") {
+      xbee_frame = XBee::Frame.new(@s)
+      assert_equal("\x01\x42\x44\x00".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    }      
   end
 
   ##
@@ -283,6 +329,29 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       xbee_frame = XBee::Frame.new(@s)
     }
   end
+  
+  ##
+  # ZigBee Receive Packet - (0x90) When the module receives an RF packet,
+  # it is sent out the UART with this message.
+  # +----------------------------+---------------------------------------------------------------+------+
+  # |___________Header___________|_____________________________Frame_____________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type |  64-bit SourceAddr |  Src16 | Options |  ReceivedData  | CSum |
+  # +--------+---------+---------+------+--------------------+--------+---------+----------------+------+
+  # |  0x7e  |   0x00  |   0x14  | 0x90 | 0x0013a20040522baa | 0x7d84 |   0x01  | 0x527844617461 | 0x01 |
+  # +--------+---------+---------+------+--------------------+--------+--------------------------+------+
+#  def test_zigbee_receive_packet
+#    Thread.fork(@server.accept) do |client|
+#      f = [ 0x7e, 0x00, 0x14, 0x90, 0x00, 0x13, 0xa2, 0x00, 0x40, 0x52, 0x2b,
+#            0xaa, 0x7d, 0x5d, 0x84, 0x01, 0x52, 0x78, 0x44, 0x61, 0x74, 0x61, 0x01]
+#      client.write(f.pack("c*"))
+#      client.close
+#    end
+#    
+#    assert_output("Initializing a ReceivedFrame of type 0x90\n") {
+#      xbee_frame = XBee::Frame.new(@s)
+#      assert_equal("\x00\x13\xa2\x00\x40\x52\x2b\xaa\x7d\x84\x01\x52\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+#    }    
+#  end
   
   ##
   # ZigBee Transmit Status (0x8B) with escaped payload
