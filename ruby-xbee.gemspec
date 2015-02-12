@@ -56,5 +56,5 @@ Gem::Specification.new do |s|
   s.test_files = %w(test/ruby_xbee_test.rb
                     test/test_helper.rb)
 
-  s.add_runtime_dependency(%q<serialport>, ['~> 1.1', '>= 1.1.0'])
+  s.add_runtime_dependency(%q<serialport>, ['~> 1.3', '>= 1.3.1'])
 end
