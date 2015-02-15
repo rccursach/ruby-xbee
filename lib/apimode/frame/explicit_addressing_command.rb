@@ -40,9 +40,13 @@ module XBee
         # We need to pack the 64-bit destination_address in two 32-bit parts.
         dest_high = (self.destination_address >> 32) & 0xFFFFFFFF
         dest_low = self.destination_address & 0xFFFFFFFF
-        #if payload.nil?
-        #  [self.frame]
-
+        if payload.nil?
+          # By default we send a null-byte payload \0
+          [self.frame_id, dest_high, dest_low, self.destination_network, self.source_endpoint, self.destination_endpoint, self.cluster_id, self.profile_id, self.broadcast_radius, self.transmit_options, self.payload].pack("CNNnCCnnCCx")
+        else
+          [self.frame_id, dest_high, dest_low, self.destination_network, self.source_endpoint, self.destination_endpoint, self.cluster_id, self.profile_id, self.broadcast_radius, self.transmit_options, self.payload].pack("CNNnCCnnCC#{payload_pack_string}")
+        end
+      end
     end
   end
 end
