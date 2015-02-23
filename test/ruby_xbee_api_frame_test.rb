@@ -7,6 +7,9 @@ require 'socket'
 # ability to construct frames. Some of the frame examples for testing are
 # based on the XBee reference manuals but feel free to run with your
 # imagination.
+#
+# More detailed frame testing are kept separate from this file. Only
+# basic frame stuff here.
 # ==================================================
 # Currently known frames, o = covered by test frames
 # ==================================================
@@ -20,7 +23,7 @@ require 'socket'
 # o - 0x8a - Modem Status
 # o - 0x8b - ZigBee Transmit Status
 # o - 0x90 - ZigBee Receive Packet (AO=0)
-# x - 0x91 - ZigBee Explicit Rx Indicator (AO=1)
+# o - 0x91 - ZigBee Explicit Rx Indicator (AO=1)
 # o - 0x92 - ZigBee IO Data Sample Rx Indicator
 # x - 0x94 - XBee Sensor Read Indicator (AO=0)
 # x - 0x95 - Node Identification Indicator (AO=0)
@@ -57,9 +60,8 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x00\n") {
-      xbee_frame = XBee::Frame.new(@s)
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal(0x00, xbee_frame.api_identifier)
   end
 
   ##
@@ -99,10 +101,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x08\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01NJ\xFF".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01NJ\xFF".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x08, xbee_frame.api_identifier)
   end
 
   ##
@@ -120,10 +121,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x08\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01ND".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01ND".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x08, xbee_frame.api_identifier)
   end
 
   ##
@@ -141,10 +141,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x09\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01BD\x07".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01BD\x07".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x09, xbee_frame.api_identifier)
   end
 
   ##
@@ -164,10 +163,10 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.write(f.pack("c*"))
       client.close
     end
-    assert_output("Initializing a ReceivedFrame of type 0x10\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x00\x13\xa2\x00\x40\x0a\x01\x27\xff\xfe\x00\x00\x54\x78\x44\x61\x74\x61\x30\x41".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01\x00\x13\xa2\x00\x40\x0a\x01\x27\xff\xfe\x00\x00\x54\x78\x44\x61\x74\x61\x30\x41".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x10, xbee_frame.api_identifier)
   end
 
   ##
@@ -187,10 +186,10 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.write(f.pack("c*"))
       client.close
     end
-    assert_output("Initializing a ReceivedFrame of type 0x11\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xa0\xa1\x15\x54\xc1\x05\x00\x00\x54\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01\x00\x00\x00\x00\x00\x00\x00\x00\xff\xfe\xa0\xa1\x15\x54\xc1\x05\x00\x00\x54\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x11, xbee_frame.api_identifier)
   end
 
   ##
@@ -209,10 +208,10 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.write(f.pack("c*"))
       client.close
     end
-    assert_output("Initializing a ReceivedFrame of type 0x17\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x01\x23\x45\x67\x89\xAB\xCD\xEF\xFC\xFE\x02D1\x03".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01\x01\x23\x45\x67\x89\xAB\xCD\xEF\xFC\xFE\x02D1\x03".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x17, xbee_frame.api_identifier)
   end
 
   ##
@@ -231,10 +230,10 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.write(f.pack("c*"))
       client.close
     end
-    assert_output("Initializing a ReceivedFrame of type 0x21\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x00\x00\x13\xa2\x00\x40\x40\x11\x22\x33\x44\x00\x03\xee\xff\xcc\xdd\xaa\xbb".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x00\x00\x13\xa2\x00\x40\x40\x11\x22\x33\x44\x00\x03\xee\xff\xcc\xdd\xaa\xbb".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x21, xbee_frame.api_identifier)
   end
 
   ##
@@ -253,10 +252,10 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.write(f.pack("c*"))
       client.close
     end
-    assert_output("Initializing a ReceivedFrame of type 0x88\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x42\x44\x00".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x01\x42\x44\x00".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x88, xbee_frame.api_identifier)
   end
 
   ##
@@ -275,12 +274,11 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x8a\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x02", xbee_frame.cmd_data)
-      assert_equal(2, xbee_frame.status[0])
-      assert_equal(:Associated, xbee_frame.status[1])
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x02", xbee_frame.cmd_data)
+    assert_equal(2, xbee_frame.status[0])
+    assert_equal(:Associated, xbee_frame.status[1])
+    assert_equal(0x8a, xbee_frame.api_identifier)
   end
 
   ##
@@ -301,12 +299,12 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x8a\n") {
-      runtimeerror_raised = assert_raises(RuntimeError) {
-        xbee_frame = XBee::Frame.new(@s);
-      }
-      assert_equal("ModemStatus frame appears to include an invalid status value: 0x06", runtimeerror_raised.message)
+    runtimeerror_raised = assert_raises(RuntimeError) {
+      xbee_frame = XBee::Frame.new(@s);
+      assert_equal(0x8a, xbee_frame.api_identifier)
     }
+
+    assert_equal("ModemStatus frame appears to include an invalid status value: 0x06", runtimeerror_raised.message)
   end
 
   ##
@@ -325,9 +323,30 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x8b\n") {
-      xbee_frame = XBee::Frame.new(@s)
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal(0x8b, xbee_frame.api_identifier)
+  end
+
+  ##
+  # ZigBee Transmit Status (0x8B) with escaped payload
+  # +----------------------------+----------------------------------------------------------------------------+------+
+  # |___________Header___________|___________________________________Frame____________________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | ID | Dest16 | TransmitRetryCount | DeliveryStatus | DiscoveryStatus | CSum |
+  # +--------+---------+---------+------+----+--------+--------------------+----------------+-----------------+------+
+  # |  0x7e  |   0x00  |   0x07  | 0x8b |0x01| 0x7d84 |        0x00        |      0x00      |       0x01      | 0x71 |
+  # +--------+---------+---------+------+----+--------+--------------------+----------------+-----------------+------+
+  def test_zigbee_transmit_status_escaped_dataload
+    Thread.fork(@server.accept) do |client|
+      # 7d needs to be escaped 7d => 7d 5d
+      f = [ 0x7e, 0x00, 0x07, 0x8b, 0x01, 0x7d, 0x5d, 0x84, 0x00, 0x00, 0x01, 0x71 ]
+      client.write(f.pack("c*"))
+      client.close
+    end
+
+
+    xbee_frame = XBee::Frame.new(@s, :API2)
+    assert_equal("\x01\x7d\x84\x00\x00\x01".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x8b, xbee_frame.api_identifier)
   end
 
   ##
@@ -349,10 +368,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x90\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x00\x13\xa2\x00\x40\x52\x2b\xaa\x7d\x84\x01\x52\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s, :API2)
+    assert_equal("\x00\x13\xa2\x00\x40\x52\x2b\xaa\x7d\x84\x01\x52\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x90, xbee_frame.api_identifier)
   end
 
   ##
@@ -373,32 +391,34 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x90\n") {
-      xbee_frame = XBee::Frame.new(@s, :API1)
-      assert_equal("\x00\x13\xa2\x00\x40\x52\x2b\xaa\x7d\x84\x01\x52\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s, :API1)
+    assert_equal("\x00\x13\xa2\x00\x40\x52\x2b\xaa\x7d\x84\x01\x52\x78\x44\x61\x74\x61".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x90, xbee_frame.api_identifier)
   end
 
   ##
-  # ZigBee Transmit Status (0x8B) with escaped payload
-  # +----------------------------+----------------------------------------------------------------------------+------+
-  # |___________Header___________|___________________________________Frame____________________________________|      |
-  # | SDelim | DlenMSB | DlenLSB | Type | ID | Dest16 | TransmitRetryCount | DeliveryStatus | DiscoveryStatus | CSum |
-  # +--------+---------+---------+------+----+--------+--------------------+----------------+-----------------+------+
-  # |  0x7e  |   0x00  |   0x07  | 0x8b |0x01| 0x7d84 |        0x00        |      0x00      |       0x01      | 0x71 |
-  # +--------+---------+---------+------+----+--------+--------------------+----------------+-----------------+------+
-  def test_zigbee_transmit_status_escaped_dataload
+  # ZigBee Explicit Rx Indicator - (0x91) When the modem receives a ZigBee RF packet
+  # it is sent out the UART using this message type (when AO=1).
+  # +----------------------------+----------------------------------------------------------------------------------------------------------------+------+
+  # |___________Header___________|_____________________________________________________Frame______________________________________________________|      |
+  # | SDelim | DlenMSB | DlenLSB | Type | 64-bit Source Addr | Src.16 | SrcEndPnt | DestEndPnt | ClusterID | ProfileID | Options |  Data Payload  | CSum |
+  # +--------+---------+---------+------+--------------------+--------+-----------+------------+-----------+-----------+---------+----------------+------+
+  # |  0x7E  |   0x00  |   0x13  | 0x91 | 0x1234567890ABCDEF | 0x1234 |    0xE8   |    0xE8    |   0x0011  |   0xC105  |   0x01  |      0x43      | 0x32 |
+  # +--------+---------+---------+------+--------------------+--------+-----------+------------+-----------+-----------+---------+----------------+------+
+  # This frame is sent in response to type ZigBee Explicit Addressing Command (Frame Type: 0x11). The cluster 0x0011 is used by Digi as Virtual serial line
+  # And use for example in OTA firmware upgrade
+  def test_zigbee_explicit_rx_indicator
     Thread.fork(@server.accept) do |client|
-      # 7d needs to be escaped 7d => 7d 5d
-      f = [ 0x7e, 0x00, 0x07, 0x8b, 0x01, 0x7d, 0x5d, 0x84, 0x00, 0x00, 0x01, 0x71 ]
+      f = [ 0x7E, 0x00, 0x13, 0x91, 0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF,
+            0x12, 0x34, 0xE8, 0xE8, 0x00, 0x11, 0xC1, 0x05, 0x01, 0x43, 0x32 ]
       client.write(f.pack("c*"))
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x8b\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x01\x7d\x84\x00\x00\x01".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x12\x34\x56\x78\x90\xAB\xCD\xEF\x12\x34\xE8\xE8\x00\x11\xC1\x05\x01\x43".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x91, xbee_frame.api_identifier)
   end
 
   ##
@@ -425,10 +445,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x92\n") {
-        xbee_frame = XBee::Frame.new(@s)
-        assert_equal("\x00\x12\xa2\x00\x40\x52\x2b\xaa\x7c\x84\x01\x01\x00\x1c\x02\x00\x14\x02\x25".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal("\x00\x12\xa2\x00\x40\x52\x2b\xaa\x7c\x84\x01\x01\x00\x1c\x02\x00\x14\x02\x25".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
+    assert_equal(0x92, xbee_frame.api_identifier)
   end
 
   ##
@@ -449,9 +468,8 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x97\n") {
-      xbee_frame = XBee::Frame.new(@s)
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal(0x97, xbee_frame.api_identifier)
   end
 
   ##
@@ -470,11 +488,9 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x97\n") {
-      xbee_frame = XBee::Frame.new(@s)
-      assert_equal("\x97".force_encoding("iso-8859-1"), xbee_frame.api_identifier.force_encoding("iso-8859-1"))
-      assert_equal("\x04\x00\x12\xa2\x00\x40\x52\x2b\xaa\x7c\x84\x53\x4c\x04\x40\x52\x2b\xaa".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
-    }
+    xbee_frame = XBee::Frame.new(@s)
+    assert_equal(0x97, xbee_frame.api_identifier)
+    assert_equal("\x04\x00\x12\xa2\x00\x40\x52\x2b\xaa\x7c\x84\x53\x4c\x04\x40\x52\x2b\xaa".force_encoding("iso-8859-1"), xbee_frame.cmd_data.force_encoding("iso-8859-1"))
   end
 
   ##
@@ -493,12 +509,12 @@ class RubyXbeeApiFrameTest < MiniTest::Test
       client.close
     end
 
-    assert_output("Initializing a ReceivedFrame of type 0x97\n") {
-      runtimeerror_raised = assert_raises(RuntimeError) {
+    runtimeerror_raised = assert_raises(RuntimeError) {
         xbee_frame = XBee::Frame.new(@s)
-      }
-      assert_equal("AT Command Response frame appears to include an invalid status: 0x05", runtimeerror_raised.message)
+        assert_equal(0x97, xbee_frame.api_identifier)
     }
+    assert_equal("AT Command Response frame appears to include an invalid status: 0x05", runtimeerror_raised.message)
+
   end
 
   ##

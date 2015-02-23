@@ -73,5 +73,22 @@ module XBee
         super("NI", default)
       end
     end
+
+    class ApiEnableMode < RFModuleParameter
+      def initialize(default = 0x01)
+        unless default == 0x01 or default == 0x02
+          raise "XBee AP parameter range can be 1-2; 1 = API-enabled; 2 = API-enabled (with escaped control characters)"
+        end
+        super("AP", default)
+      end
+
+      def in_symbol
+        unless self.value == 0x01 or self.value == 0x02
+          raise "XBee AP parameter invalid range! Valid range 1-2; Set to: #{self.value}"
+        end
+        return :API1 if self.value == 0x01
+        return :API2 if self.value == 0x02
+      end
+    end
   end
 end

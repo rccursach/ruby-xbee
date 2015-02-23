@@ -6,8 +6,8 @@ module XBee
   ##
   # This is the main class for API mode for XBee radios.
   class BaseAPIModeInterface < RFModule
-  
-    VERSION = "1.1.0" # Version of this class
+
+    VERSION = "1.2.0" # Version of this class
 
     ##
     # ==== Attributes
@@ -18,8 +18,8 @@ module XBee
     # * +operation_mode+ - Either :AT or :API for XBee operation mode
     # * +transmission_mode+ - :SYNC for Synchronous communication or :ASYNC for Asynchonrous communication.
     #
-    # A note on the asynchronous vs synchronous communication modes - A 
-    # simplistic network of a few XBee nodes can pretty much work according to 
+    # A note on the asynchronous vs synchronous communication modes - A
+    # simplistic network of a few XBee nodes can pretty much work according to
     # expected flows where requests and responses are always handled in
     # synchronous ways. However, if bigger radio networks are being deployed
     # (real scenarios) you cannot guarantee the synchronous nature of the network.
@@ -37,8 +37,8 @@ module XBee
     #   @uart_config = XBee::Config::XBeeUARTConfig.new()
     #   @xbee_usbdev_str = '/dev/tty.usbserial-A101KYF6'
     #   @xbee = XBee::BaseAPIModeInterface.new(@xbee_usbdev_str, @uart_config, :API, :ASYNC)
-    #  
-    def initialize(xbee_usbdev_str, uart_config = XBeeUARTConfig.new, operation_mode = :AT, transmission_mode = :SYNC)
+    #
+    def initialize(xbee_usbdev_str, uart_config = XBeeUARTConfig.new, operation_mode = :API, transmission_mode = :SYNC)
       super(xbee_usbdev_str, uart_config, operation_mode, transmission_mode)
       @frame_id = 1
       if self.operation_mode == :AT
@@ -54,11 +54,14 @@ module XBee
     # Switch to API mode - note that in Series 2 the Operation Mode is defined
     # by the firmware flashed to the device. Only Series 1 can switch from
     # AT (Transparent) to API Opearation and back seamlessly.
+    #
+    # API Mode 1 - API Enabled
+    # API Mode 2 - API Enabled, with escaped control characters
     def start_apimode_communication
       in_command_mode do
         puts "Entering api mode"
         # Set API Mode 2 (include escaped characters)
-        self.xbee_serialport.write("ATAP2\r")
+        self.xbee_serialport.write("ATAP1\r")
         self.xbee_serialport.read(3)
       end
     end
@@ -66,10 +69,10 @@ module XBee
     def get_param(at_param_name, at_param_unpack_string = nil)
       frame_id = self.next_frame_id
       at_command_frame = XBee::Frame::ATCommand.new(at_param_name,frame_id,nil,at_param_unpack_string)
-      puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]"
-      self.xbee_serialport.write(at_command_frame._dump)
+      puts "Sending ... [#{at_command_frame._dump(self.api_mode.in_symbol).unpack("C*").join(", ")}]" if $VERBOSE
+      self.xbee_serialport.write(at_command_frame._dump(self.api_mode.in_symbol))
       if self.transmission_mode == :SYNC
-        r = XBee::Frame.new(self.xbee_serialport)
+        r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
         if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
           if block_given?
             yield r
@@ -91,10 +94,10 @@ module XBee
     def set_param(at_param_name, param_value, at_param_unpack_string = nil)
       frame_id = self.next_frame_id
       at_command_frame = XBee::Frame::ATCommand.new(at_param_name,frame_id,param_value,at_param_unpack_string)
-      # puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]"
-      self.xbee_serialport.write(at_command_frame._dump)
+      # puts "Sending ... [#{at_command_frame._dump(self.api_mode.in_symbol).unpack("C*").join(", ")}]"
+      self.xbee_serialport.write(at_command_frame._dump(self.api_mode.in_symbol))
       if self.transmission_mode == :SYNC
-      r = XBee::Frame.new(self.xbee_serialport)
+      r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
         if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
           if block_given?
             yield r
@@ -110,10 +113,10 @@ module XBee
     def get_remote_param(at_param_name, remote_address = 0x000000000000ffff, remote_network_address = 0xfffe, at_param_unpack_string = nil)
       frame_id = self.next_frame_id
       at_command_frame = XBee::Frame::RemoteCommandRequest.new(at_param_name, remote_address, remote_network_address, frame_id, nil, at_param_unpack_string)
-      puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]" 
-      self.xbee_serialport.write(at_command_frame._dump)
+      puts "Sending ... [#{at_command_frame._dump(self.api_mode.in_symbol).unpack("C*").join(", ")}]"
+      self.xbee_serialport.write(at_command_frame._dump(self.api_mode.in_symbol))
       if self.transmission_mode == :SYNC
-        r = XBee::Frame.new(self.xbee_serialport)
+        r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
         if r.kind_of?(XBee::Frame::RemoteCommandResponse) && r.status == :OK && r.frame_id == frame_id
           if block_given?
             yield r
@@ -129,10 +132,10 @@ module XBee
     def set_remote_param(at_param_name, param_value, remote_address = 0x000000000000ffff, remote_network_address = 0xfffe, at_param_unpack_string = nil)
       frame_id = self.next_frame_id
       at_command_frame = XBee::Frame::RemoteCommandRequest.new(at_param_name, remote_address, remote_network_address, frame_id, param_value, at_param_unpack_string)
-      puts "Sending ... [#{at_command_frame._dump.unpack("C*").join(", ")}]"
-      self.xbee_serialport.write(at_command_frame._dump)
+      puts "Sending ... [#{at_command_frame._dump(self.api_mode.in_symbol).unpack("C*").join(", ")}]"
+      self.xbee_serialport.write(at_command_frame._dump(self.api_mode.in_symbol))
       if self.transmission_mode == :SYNC
-        r = XBee::Frame.new(self.xbee_serialport)
+        r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
         if r.kind_of?(XBee::Frame::RemoteCommandResponse) && r.status == :OK && r.frame_id == frame_id
           if block_given?
             yield r
@@ -185,15 +188,15 @@ module XBee
       frame_id = self.next_frame_id
       # neighbors often takes more than 1000ms to return data
       node_discover_cmd = XBee::Frame::ATCommand.new("ND",frame_id,nil)
-      #puts "Node discover command dump: #{node_discover_cmd._dump.unpack("C*").join(", ")}"
+      #puts "Node discover command dump: #{node_discover_cmd._dump(self.api_mode.in_symbol).unpack("C*").join(", ")}"
       tmp = @xbee_serialport.read_timeout
       @xbee_serialport.read_timeout = Integer(self.node_discover_timeout.in_seconds * 1050)
-      @xbee_serialport.write(node_discover_cmd._dump)
+      @xbee_serialport.write(node_discover_cmd._dump(self.api_mode.in_symbol))
       responses = []
       #read_thread = Thread.new do
       begin
         loop do
-          r = XBee::Frame.new(self.xbee_serialport)
+          r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
           # puts "Got a response! Frame ID: #{r.frame_id}, Command: #{r.at_command}, Status: #{r.status}, Value: #{r.retrieved_value}"
           if r.kind_of?(XBee::Frame::ATCommandResponse) && r.status == :OK && r.frame_id == frame_id
             if r.retrieved_value.empty?
@@ -560,7 +563,7 @@ module XBee
     def reset!
       @xbee_serialport.write("ATFR\r")
     end
-    
+
     ##
     # Performs a network reset on one or more modules within a PAN. The module responds
     # immediately with an "OK" and then restarts the network. All network configuration
@@ -617,7 +620,7 @@ module XBee
     # echo is disabled by default
     def getresponse( echo = false )
       if echo == true
-        r = XBee::Frame.new(self.xbee_serialport)
+        r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
       else
         getresults( @xbee_serialport, echo )
       end
@@ -634,6 +637,12 @@ module XBee
   end  # class Series1APIModeInterface
 
   class Series2APIModeInterface < BaseAPIModeInterface
-
+    ##
+    # Initiating the application firmware OTA upgrade for Programmable XBee modules
+    def init_ota_upgrade(password = nil, remote_address = 0x000000000000ffff, remote_network_address = 0xfffe)
+      frame_id = self.next_frame_id
+      command_frame = XBee::Frame::ExplicitAddressingCommand.new(frame_id, remote_address, remote_network_address, 0xE8, 0xE8, 0x1000, 0xC105, 0x00, 0x00, password)
+      self.xbee_serialport.write(command_frame._dump(self.api_mode.in_symbol))
+    end
   end # class Series2APIModeInterface
 end

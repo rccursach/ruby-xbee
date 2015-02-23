@@ -66,12 +66,12 @@ module XBee
   # This is it, the base class where it all starts. Command mode or API mode, version 1 or version 2, all XBees descend
   # from this class.
   class RFModule
-  
+
     VERSION = "2.1"
-  
+
     include XBee
     include Config
-    attr_accessor :xbee_serialport, :xbee_uart_config, :guard_time, :command_mode_timeout, :command_character, :node_discover_timeout, :node_identifier, :operation_mode, :transmission_mode
+    attr_accessor :xbee_serialport, :xbee_uart_config, :guard_time, :command_mode_timeout, :command_character, :node_discover_timeout, :node_identifier, :operation_mode, :api_mode, :transmission_mode
     attr_reader :serial_number, :hardware_rev, :firmware_rev
 
     def version
@@ -100,6 +100,7 @@ module XBee
       @node_discover_timeout = NodeDiscoverTimeout.new
       @node_identifier = NodeIdentifier.new
       @operation_mode = operation_mode
+      @api_mode = ApiEnableMode.new
       @transmission_mode = transmission_mode
     end
 
@@ -123,7 +124,7 @@ module XBee
       case type
         when :short
           1200
-        when :long 
+        when :long
           3000
         else 3000
       end

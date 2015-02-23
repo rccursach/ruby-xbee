@@ -11,9 +11,9 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
   s.authors = ['Landon Cox', 'Mike Ashmore', 'Sten Feldman']
-  s.date = %q{2014-03-09}
+  s.date = %q{2015-02-23}
   s.email = %q{exile@chamber.ee}
-  s.executables = %w(apicontrol.rb apilisten.rb ruby-xbee.rb xbeeconfigure.rb xbeedio.rb xbeeinfo.rb xbeelisten.rb xbeesend.rb)
+  s.executables = %w(apicontrol.rb apilisten.rb ota_upgrade.rb ruby-xbee.rb xbeeconfigure.rb xbeedio.rb xbeeinfo.rb xbeelisten.rb xbeesend.rb)
   s.extra_rdoc_files = %w(LICENSE agpl.txt README.rdoc)
   s.files = %w(
     LICENSE
@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
     Rakefile
     bin/apicontrol.rb
     bin/apilisten.rb
+    bin/ota_upgrade.rb
     bin/ruby-xbee.rb
     bin/xbeeconfigure.rb
     bin/xbeedio.rb
@@ -43,6 +44,10 @@ Gem::Specification.new do |s|
     lib/legacy/command_mode.rb
     lib/module_config.rb
     lib/ruby_xbee.rb
+    test/ruby_xbee_api_frame_eac_test.rb
+    test/ruby_xbee_api_frame_erxi_test.rb
+    test/ruby_xbee_api_frame_test.rb
+    test/ruby_xbee_apimode_test.rb
     test/ruby_xbee_test.rb
     test/test_helper.rb)
 
@@ -50,11 +55,29 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/exsilium/ruby-xbee}
   s.rdoc_options = %w(--charset=UTF-8)
   s.require_paths = %w(lib)
-  s.rubygems_version = %q{1.3.1}
   s.summary = %q{Controlling an XBee module from Ruby either in AT (Transparent) or API mode. Both Series 1 and Series 2 radio modules are supported.}
-  s.description = %q{A Ruby XBee gem}
-  s.test_files = %w(test/ruby_xbee_test.rb
+  s.description = <<-EOF
+  Middleware for controlling an XBee module from Ruby. Series 1, Series 2 modules
+  supported in AT (Transparent) or API (non-escaped & escaped) mode.
+
+  Examples included how to use including Over-The-Air application firmware
+  upgrade for programmable XBee modules.
+  EOF
+  s.test_files = %w(test/ruby_xbee_api_frame_eac_test.rb
+                    test/ruby_xbee_api_frame_erxi_test.rb
+                    test/ruby_xbee_api_frame_test.rb
+                    test/ruby_xbee_apimode_test.rb
+                    test/ruby_xbee_test.rb
                     test/test_helper.rb)
 
   s.add_runtime_dependency(%q<serialport>, ['~> 1.3', '>= 1.3.1'])
+
+  s.add_development_dependency "rake",               "~> 0"
+  s.add_development_dependency "hanna-nouveau",      "~> 0.4"
+  s.add_development_dependency "VersionCheck",       "~> 1.0"
+  s.add_development_dependency "simplecov",          "~> 0.9"
+  s.add_development_dependency "minitest",           "~> 5.5"
+  s.add_development_dependency "minitest-reporters", "~> 1.0"
+  s.add_development_dependency "coveralls",          "~> 0.7"
+
 end

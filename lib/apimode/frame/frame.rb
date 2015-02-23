@@ -15,9 +15,9 @@ module XBee
       0xFF - (data.unpack("C*").inject(0) { |sum, byte| (sum + byte) & 0xFF })
     end
 
-    def Frame.new(source_io, api_mode = :API2)
+    def Frame.new(source_io, api_mode = :API1)
       stray_bytes = []
-      unless api_mode == :API1 || api_mode == :API2
+      unless api_mode == :API1 or api_mode == :API2
         raise "XBee api_mode must be either :API1 (non-escaped) or :API2 (escaped, default)"
       end
       until (start_delimiter = source_io.readchar.unpack('H*').join.to_i(16)) == 0x7e
@@ -25,9 +25,14 @@ module XBee
         print "DEBUG: #{start_delimiter} | " if $DEBUG
         stray_bytes << start_delimiter
       end
-      puts "Got some stray bytes for ya: #{stray_bytes.map {|b| "0x%x" % b} .join(", ")}" unless stray_bytes.empty?
-      header = source_io.read(3) if api_mode == :API1
-      header = source_io.read(2).xb_unescape if api_mode == :API2
+      if $VERBOSE
+        puts "Got some stray bytes for ya: #{stray_bytes.map {|b| "0x%x" % b} .join(", ")}" unless stray_bytes.empty?
+      end
+      if(api_mode == :API1)
+        header = source_io.read(3)
+      elsif(api_mode == :API2)
+        header = source_io.read(2).xb_unescape
+      end
       print "Reading ... header after start byte: #{header.unpack("C*").join(", ")} | " if $DEBUG
       frame_remaining = frame_length = api_identifier = cmd_data = ""
       if api_mode == :API2
@@ -117,26 +122,29 @@ module XBee
         Array(api_identifier).pack("C") + cmd_data
       end
 
-      def _dump(api_mode = :API2)
-        unless api_mode == :API1 || api_mode == :API2
+      def _dump(api_mode = :API1)
+        unless api_mode == :API1 or api_mode == :API2
           raise "XBee api_mode must be either :API1 (non-escaped) or :API2 (escaped, default)"
         end
         raise "Too much data (#{self.length} bytes) to fit into one frame!" if (self.length > 0xFFFF)
-        "~" + [length].pack("n") + data + [Frame.checksum(data)].pack("C") if api_mode == :API1
-        "~" + [length].pack("n").xb_escape + data.xb_escape + [Frame.checksum(data)].pack("C") if api_mode == :API2
+
+        if (api_mode == :API1)
+          "~" + [length].pack("n") + data + [Frame.checksum(data)].pack("C")
+        elsif (api_mode == :API2)
+          "~" + [length].pack("n").xb_escape + data.xb_escape + [Frame.checksum(data)].pack("C")
+        end
       end
     end
 
     class ReceivedFrame < Base
       def initialize(frame_data)
-        # raise "Frame data must be an enumerable type" unless frame_data.kind_of?(Enumerable)
-        self.api_identifier = frame_data[0]
+        self.api_identifier = frame_data[0].unpack('H*').join.to_i(16) unless frame_data.nil?
         if $DEBUG then
-          print "Initializing a ReceivedFrame of type 0x%02x | " % self.api_identifier.unpack('H*').join.to_i(16)
-        else
-          puts "Initializing a ReceivedFrame of type 0x%02x" % self.api_identifier.unpack('H*').join.to_i(16)
+          print "Initializing a ReceivedFrame of type 0x%02x | " % self.api_identifier
+        elsif $VERBOSE
+          puts "Initializing a ReceivedFrame of type 0x%02x" % self.api_identifier
         end
-        self.cmd_data = frame_data[1..-1]
+        self.cmd_data = frame_data[1..-1] unless frame_data.nil?
       end
     end
   end
