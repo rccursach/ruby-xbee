@@ -32,7 +32,7 @@ module XBee
       # if XBee is already in command mode, there will be no response, so make an explicit
       # AT call to insure an OK response
       @xbee_serialport.write("AT\r")
-      getresponse().strip.chomp if getresponse()
+      getresponse.strip.chomp
     end
 
 =begin rdoc
@@ -123,7 +123,7 @@ module XBee
 =end
     def my_src_address
       @xbee_serialport.write("ATMY\r")
-      getresponse.strip.chomp if getresponse
+      getresponse.strip.chomp
     end
 
 =begin rdoc
@@ -219,7 +219,7 @@ module XBee
       tmp = @xbee_serialport.read_timeout
       @xbee_serialport.read_timeout = read_timeout(:long)
       @xbee_serialport.write("ATNI\r")
-      response = getresponse
+      response = getresponse()
       @xbee_serialport.read_timeout = tmp
       if ( response.nil? )
         return ""
@@ -274,7 +274,7 @@ module XBee
 =end
     def received_signal_strength
       @xbee_serialport.write("ATDB\r")
-      response = getresponse().strip.chomp if getresponse()
+      response = getresponse.strip.chomp
       # this response is an absolute hex value which is in -dBm
       # modify this so it returns actual - dBm value
       dbm = -(response.hex) if response
@@ -313,7 +313,7 @@ module XBee
 =end
    def parity
      @xbee_serialport.write("ATNB\r")
-     response = getresponse().strip.chomp if getresponse()
+     response = getresponse().strip.chomp
      @paritycodes.key( response.to_i )
    end
 

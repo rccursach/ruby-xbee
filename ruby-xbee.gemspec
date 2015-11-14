@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new('>= 0') if s.respond_to? :required_rubygems_version=
   s.authors = ['Landon Cox', 'Mike Ashmore', 'Sten Feldman']
-  s.date = %q{2015-02-23}
+  s.date = %q{2015-11-14}
   s.email = %q{exile@chamber.ee}
   s.executables = %w(apicontrol.rb apilisten.rb ota_upgrade.rb ruby-xbee.rb xbeeconfigure.rb xbeedio.rb xbeeinfo.rb xbeelisten.rb xbeesend.rb)
   s.extra_rdoc_files = %w(LICENSE agpl.txt README.rdoc)
@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
     lib/apimode/frame/explicit_addressing_command.rb
     lib/apimode/frame/explicit_rx_indicator.rb
     lib/apimode/frame/frame.rb
+    lib/apimode/frame/io_data_sample_rx_indicator.rb
     lib/apimode/frame/modem_status.rb
     lib/apimode/frame/receive_packet.rb
     lib/apimode/frame/remote_command_request.rb

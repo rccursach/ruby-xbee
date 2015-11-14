@@ -6,8 +6,8 @@ rescue LoadError => e
   load_path_addition = File.dirname(File.dirname(__FILE__)) + "/lib"
   puts "Falling back to extended load path #{load_path_addition}"
   $: << load_path_addition
-  require 'ruby_xbee'
 end
+  require 'ruby_xbee'
 
 @xbee_usbdev_str = case ARGV[0]
   when "cable" 
@@ -24,4 +24,3 @@ end
 @stop_bits = 1
 @parity = 0
 
-puts File.dirname(File.dirname(__FILE__)) + "/lib"
