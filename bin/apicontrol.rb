@@ -24,6 +24,10 @@ response = @xbee.neighbors
 response.each do |r|
   puts "----------------------"
   r.each do |key, val|
+    if val == nil
+      puts "#{key} = Not Available"
+      next
+    end
     puts case key
       when :NI 
         "#{key} = '#{val}'"
@@ -31,7 +35,8 @@ response.each do |r|
         "#{key} = 0x%02x" % val
       when :SH, :SL 
         "#{key} = 0x%08x" % val
-      else "#{key} = 0x%04x" % val
+      else
+        "#{key} = 0x%04x" % val
     end
   end
 end
