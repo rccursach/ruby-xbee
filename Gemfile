@@ -1,7 +1,4 @@
-#!/usr/bin/env bundle
-# encoding: utf-8
+source 'https://rubygems.org'
 
-source 'http://rubygems.org'
-
-# Gem's dependencies are in ruby-xbee.gemspec
+# Specify your gem's dependencies in ruxbee.gemspec
 gemspec
