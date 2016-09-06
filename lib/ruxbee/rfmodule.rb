@@ -71,19 +71,14 @@ module XBee
 
     ##
     # a method for getting results from any Ruby SerialPort object. Not ideal, but seems effective enough.
-    def getresults( sp, echo = false )
+    def getresults sp
       results = ""
       while (c = sp.getc) do
-        if ( !echo.nil? && echo )
-          #putc c
-        end
         results += "#{c.chr}"
       end
 
       # deal with multiple lines
       results.gsub!( "\r", "\n")
-      puts results.unpack("H*") if echo
-      results
     end
 
   end

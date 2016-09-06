@@ -26,7 +26,7 @@ end
 @xbee = XBee.new @dev, @speed, :API_S1
 
 loop do
-  res = @xbee.getresponse true
+  res = @xbee.getresponse
   if not res.nil? and res.api_identifier == '81'
     res = {rssi: res.rssi, address: res.address_16_bits, api_frame_id: res.api_identifier, data: res.cmd_data}
     pp res

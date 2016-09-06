@@ -616,13 +616,8 @@ module XBee
 
     ##
     # returns results from the XBee
-    # echo is disabled by default
-    def getresponse( echo = false )
-      if echo == true
-        r = XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
-      else
-        getresults( @xbee_serialport, echo )
-      end
+    def getresponse
+      XBee::Frame.new(self.xbee_serialport, self.api_mode.in_symbol)
     end
 
   end

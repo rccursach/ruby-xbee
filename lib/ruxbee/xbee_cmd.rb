@@ -537,10 +537,9 @@ module XBee
 
 =begin rdoc
   returns results from the XBee
-  echo is disabled by default
 =end
-    def getresponse( echo = false )
-      getresults( @xbee_serialport, echo )
+    def getresponse
+      getresults @xbee_serialport
     end
 
   end
