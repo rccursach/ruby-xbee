@@ -8,7 +8,7 @@ module XBee
       @options = 0x00
 
       def initialize(frame_data)
-        self.api_identifier = frame_data[0].unpack('H*').join.to_i(16) unless frame_data.nil?
+        self.api_identifier = frame_data[0].unpack('H*')[0] #.join.to_i(16) unless frame_data.nil?
         if $DEBUG then
           print "Initializing a ReceivedFrame of type 0x%02x | " % self.api_identifier
         elsif $VERBOSE
@@ -18,6 +18,10 @@ module XBee
         @rssi = frame_data[3] unless frame_data.nil?
         @options = frame_data[4] unless frame_data.nil?
         self.cmd_data = frame_data[5..-1] unless frame_data.nil?
+
+        @rssi = @rssi.unpack('C')[0]
+        @address_16_bits = @address_16_bits.unpack('B8B8').join()
+        @options = @options.unpack('B8')[0]
       end
     end
 

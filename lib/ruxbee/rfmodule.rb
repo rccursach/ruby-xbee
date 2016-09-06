@@ -1,5 +1,5 @@
 require 'serialport'
-require_relative 'config'
+require 'ruxbee/config'
 module XBee
   ##
   # This is it, the base class where it all starts. Command mode or API mode, version 1 or version 2, all XBees descend

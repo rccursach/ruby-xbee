@@ -1,4 +1,4 @@
-require_relative 'at_command'
+require 'ruxbee/frame/at_command'
 
 module XBee
   module Frame

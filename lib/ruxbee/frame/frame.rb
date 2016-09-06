@@ -1,3 +1,17 @@
+require 'ruxbee/frame/base_frame'
+require 'ruxbee/frame/received_frame'
+require 'ruxbee/frame/at_command'
+require 'ruxbee/frame/at_command_response'
+require 'ruxbee/frame/explicit_addressing_command'
+require 'ruxbee/frame/explicit_rx_indicator'
+require 'ruxbee/frame/io_data_sample_rx_indicator'
+require 'ruxbee/frame/modem_status'
+require 'ruxbee/frame/receive_packet'
+require 'ruxbee/frame/remote_command_request'
+require 'ruxbee/frame/remote_command_response'
+require 'ruxbee/frame/transmit_request'
+require 'ruxbee/frame/transmit_status'
+require 'ruxbee/frame/receive_packet_16'
 
 class String
   def xb_escape
@@ -112,18 +126,3 @@ module XBee
 
   end
 end
-
-require_relative 'base_frame'
-require_relative 'received_frame'
-require_relative 'at_command'
-require_relative 'at_command_response'
-require_relative 'explicit_addressing_command'
-require_relative 'explicit_rx_indicator'
-require_relative 'io_data_sample_rx_indicator'
-require_relative 'modem_status'
-require_relative 'receive_packet'
-require_relative 'remote_command_request'
-require_relative 'remote_command_response'
-require_relative 'transmit_request'
-require_relative 'transmit_status'
-require_relative 'receive_packet_16'

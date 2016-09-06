@@ -1,4 +1,4 @@
-require_relative 'rfmodule'
+require 'ruxbee/rfmodule'
 
 module XBee
   class BaseCommandModeInterface < RFModule

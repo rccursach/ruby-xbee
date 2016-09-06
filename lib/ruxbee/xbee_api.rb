@@ -1,5 +1,5 @@
-require_relative 'rfmodule'
-require_relative 'frame/frame'
+require 'ruxbee/rfmodule'
+require 'ruxbee/frame/frame'
 
 module XBee
   ##
